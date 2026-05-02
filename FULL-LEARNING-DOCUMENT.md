@@ -330,4 +330,20 @@ Key workflows:
 
 Below is your **structured learning roadmap**, from beginner to advanced.
 
+**01.** Learn C# and .NET FundamentalsMaster C# syntax, OOP, async programming, and the .NET runtime to build a strong foundation.
+
+**02.** Understand ASP.NET Core ArchitectureStudy middleware, routing, dependency injection, configuration, and hosting models.
+
+**03.** Build MVC and Web API ProjectsCreate CRUD apps, REST APIs, and learn model binding, validation, and serialization.
+
+**04.** Integrate MySQL DatabasesPractice EF Core, Dapper, and ADO.NET to understand multiple data access patterns.
+
+**05.** Develop Frontend Integration SkillsUse Razor, Tailwind, or SPA frameworks and learn API-first frontend architecture.
+
+**06.** Apply Security and Performance Best PracticesImplement authentication, authorization, caching, logging, and secure coding standards.
+
+**07.** Deploy to Cloud and Automate CI/CDUse Docker, Linux hosting, GitHub Actions, and cloud services for real deployments.
+
+![STEP‑BY‑STEP LEARNING PATH](images/01-step-by-step-learning.png)
+
 ---
