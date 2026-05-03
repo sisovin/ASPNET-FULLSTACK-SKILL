@@ -1,0 +1,103 @@
+@page "/cart"
+@attribute [Authorize]
+@inject ICartService CartService
+
+<PageTitle>My Cart – PhoneShop</PageTitle>
+
+<h1>My Cart</h1>
+
+@if (_loading)
+{
+    <p>Loading cart…</p>
+}
+else if (_items.Count == 0)
+{
+    <p>Your cart is empty. <a href="/">Continue shopping</a></p>
+}
+else
+{
+    <table class="cart-table">
+        <thead>
+            <tr>
+                <th scope="col">Product</th>
+                <th scope="col">Price</th>
+                <th scope="col">Qty</th>
+                <th scope="col">Subtotal</th>
+                <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in _items)
+            {
+                <tr>
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                        {
+                            <img src="@item.ImageUrl" alt="@item.ProductName" width="48" height="48" />
+                        }
+                        @item.ProductName
+                    </td>
+                    <td>$@item.Price.ToString("F2")</td>
+                    <td>
+                        <input type="number"
+                               value="@item.Quantity"
+                               min="1" max="99"
+                               aria-label="Quantity for @item.ProductName"
+                               @onchange="e => UpdateQty(item, e)"
+                               class="qty-input" />
+                    </td>
+                    <td>$@((item.Price * item.Quantity).ToString("F2"))</td>
+                    <td>
+                        <button @onclick="() => Remove(item)" class="btn btn-danger btn-sm">Remove</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3"><strong>Total</strong></td>
+                <td><strong>$@Total.ToString("F2")</strong></td>
+                <td>
+                    <button @onclick="Clear" class="btn btn-outline btn-sm">Clear cart</button>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+}
+
+@code {
+    private List<CartItemDto> _items   = [];
+    private bool              _loading = true;
+
+    private decimal Total => _items.Sum(i => i.Price * i.Quantity);
+
+    protected override async Task OnInitializedAsync() => await LoadCart();
+
+    private async Task LoadCart()
+    {
+        _loading = true;
+        _items   = await CartService.GetCartAsync();
+        _loading = false;
+    }
+
+    private async Task UpdateQty(CartItemDto item, ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var qty) && qty > 0)
+        {
+            item.Quantity = qty;
+            await CartService.UpdateCartAsync(item.ProductId, qty);
+        }
+    }
+
+    private async Task Remove(CartItemDto item)
+    {
+        await CartService.RemoveFromCartAsync(item.ProductId);
+        _items.Remove(item);
+    }
+
+    private async Task Clear()
+    {
+        await CartService.ClearCartAsync();
+        _items.Clear();
+    }
+}

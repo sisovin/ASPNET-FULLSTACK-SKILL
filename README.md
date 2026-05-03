@@ -1,211 +1,366 @@
-# ASPNET-FULLSTACK-SKILL
+# Full-Stack ASP.NET 10 Phone Shop Web App
 
-![.NET](https://img.shields.io/badge/.NET-8_LTS-512BD4?logo=dotnet&logoColor=white)
-[![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci.yml)
-[![License](https://img.shields.io/github/license/OWNER/REPO)](LICENSE)
+A modern full-stack sample e-commerce application for selling phones and accessories.
 
-> Replace `OWNER/REPO` in badge URLs with your GitHub repository slug after pushing this project.
+This project uses:
 
-Comprehensive skill pack for full-stack and backend engineering with ASP.NET technologies.
+- Blazor WebAssembly for the client UI
+- ASP.NET Core Web API for backend services
+- EF Core + MySQL for persistence
+- JWT bearer authentication with role-based authorization
 
-## Table Of Contents
+It is designed to run locally on Windows 11 with VS Code.
 
-- [Scope](#scope)
-- [Repository Layout](#repository-layout)
-- [Reference Map (A-H)](#reference-map-a-h)
-- [Quick Start](#quick-start)
-- [UI/UX Governance Extensions](#uiux-governance-extensions)
-- [Hook Setup](#hook-setup)
-- [Strict Framework Mode](#strict-framework-mode)
-- [Development Workflow](#development-workflow)
-- [Compatibility Notes](#compatibility-notes)
-- [Contributing](#contributing)
-- [License](#license)
+## Table of Contents
 
-This repository is structured for progressive usage:
-- `SKILL.md` is the entry point.
-- `references/` contains deep technical sections A-H.
-- `scripts/` provides reusable templates and tooling helpers.
-- `.github/` includes repo-level agent customizations.
+- [1) Project Goals](#1-project-goals)
+- [2) Architecture](#2-architecture)
+- [3) Tech Stack](#3-tech-stack)
+- [4) Features](#4-features)
+- [5) Repository Structure](#5-repository-structure)
+- [6) Data Model Overview](#6-data-model-overview)
+- [7) API Overview](#7-api-overview)
+- [8) Authentication and Authorization](#8-authentication-and-authorization)
+- [9) Configuration](#9-configuration)
+- [10) HOW-TO-RUN in VS Code on Windows 11](#10-how-to-run-in-vs-code-on-windows-11)
+- [11) Seeded Data](#11-seeded-data)
+- [12) Common Issues and Fixes](#12-common-issues-and-fixes)
+- [13) Useful Commands](#13-useful-commands)
 
-## Scope
+## 1) Project Goals
 
-This skill pack covers:
-- ASP.NET Core MVC (modern)
-- ASP.NET MVC 5 (legacy)
-- ASP.NET Core Web API
-- Minimal APIs (.NET 6+)
-- MySQL integration (EF Core and ADO.NET)
-- Full-stack frontend integration patterns
-- Cross-platform deployment and cloud delivery
-- GitHub workflow and release management
-- Security, performance, and production best practices
+The app supports two user roles:
 
-Official framework references:
-- ASP.NET Core: https://github.com/dotnet/aspnetcore
-- ASP.NET MVC 5 (AspNetWebStack): https://github.com/aspnet/AspNetWebStack
+- User:
+	- Browse categories and products
+	- Search products
+	- View product details
+	- Register/login/logout
+	- Add/update/remove cart items
+- Admin:
+	- Manage categories
+	- Manage products
 
-## Repository Layout
+## 2) Architecture
 
-```text
-aspnet-fullstack-skill/
-|-- SKILL.md
-|-- README.md
-|-- references/
-|   |-- A-architecture.md
-|   |-- B-backend.md
-|   |-- C-database.md
-|   |-- D-frontend.md
-|   |-- E-architecture-patterns.md
-|   |-- F-cloud-deploy.md
-|   |-- G-github.md
-|   |-- H-best-practices.md
-|   `-- I-UI-UX-Pro-Design.md
-|-- scripts/
-|   |-- Program.cs.template
-|   |-- aspnet-cheatsheet.sh
-|   |-- setup-git-hooks.ps1
-|   `-- ui-precommit-check.ps1
-|-- .githooks/
-|   `-- pre-commit
-`-- .github/
-    |-- agents/
-    |   `-- ui-audit-refactor.agent.md
-    |-- instructions/
-    |   `-- frontend-ui-review.instructions.md
-    `-- skills/
-        `-- ui-ux-pro-max/
-```
+This solution follows a classic Client + API + Shared contract architecture:
 
-## Reference Map (A-H)
+- PhoneShop.Client (Blazor WebAssembly)
+- PhoneShop.Server (ASP.NET Core Web API)
+- PhoneShop.Shared (shared models, DTOs, options)
 
-- Section A: Architecture and framework internals, routing, DI, middleware, filters, versioning, Swagger
-- Section B: Backend service implementation, REST, serialization, auth, CORS, OWASP
-- Section C: MySQL data access with EF Core and ADO.NET, migrations, optimization
-- Section D: Full-stack frontend integration, CSS and JS patterns, client-server communication
-- Section E: Clean architecture, layered architecture, SOLID, optional DDD
-- Section F: Cross-platform runtime, reverse proxy, Docker, cloud deployment, CI/CD
-- Section G: GitHub workflow, branching strategy, PR quality, release process
-- Section H: Coding standards, logging, exception handling, performance, security hardening
+Conceptual flow:
 
-## Quick Start
+1. Client calls API endpoints over HTTPS.
+2. API validates JWT tokens and enforces role policies.
+3. API reads/writes MySQL via EF Core.
+4. Shared project keeps DTO/model contracts consistent across client/server.
 
-### 1. Open the project in VS Code
+## 3) Tech Stack
 
-Open this folder as the workspace root:
-- `D:\laragon\www\aspnet-fullstack-skill`
+- .NET SDK: 10.0
+- Frontend: Blazor WebAssembly
+- Backend: ASP.NET Core Web API
+- ORM: Entity Framework Core
+- Database: MySQL (Pomelo provider)
+- Auth: JWT Bearer Tokens
+- API docs: OpenAPI + Swagger UI
 
-### 2. Start from the skill entry point
+## 4) Features
 
-Read:
-- `SKILL.md`
+- Public browsing of categories and products
+- Search support in product listing
+- Product detail pages
+- JWT-based authentication and persisted client session
+- Cart operations for authenticated users
+- Role-protected admin endpoints and admin pages
+- Startup database migration + development data seeding
 
-Then load the matching deep references in `references/` based on the task domain.
+## 5) Repository Structure
 
-### 3. Use included scripts
-
-- `scripts/Program.cs.template`: canonical ASP.NET Core startup and pipeline wiring
-- `scripts/aspnet-cheatsheet.sh`: command reference for dotnet, ef, docker, git
-
-## UI/UX Governance Extensions
-
-This repository includes team-level UI quality enforcement.
-
-### Repo-level frontend instruction
-
-File:
-- `.github/instructions/frontend-ui-review.instructions.md`
-
-Purpose:
-- Enforce frontend review discipline for accessibility, contrast, focus states, responsiveness, and component consistency.
-
-### Custom UI audit agent mode
-
-File:
-- `.github/agents/ui-audit-refactor.agent.md`
-
-Purpose:
-- Specialized workflow for UI audits and component refactors with constrained tooling.
-
-### Pre-commit UI enforcement
-
-Files:
-- `.githooks/pre-commit`
-- `scripts/ui-precommit-check.ps1`
-- `scripts/setup-git-hooks.ps1`
-
-Checks:
-- Missing visible focus styles on interactive UI
-- Potential low-contrast text/background hex pairs
-- Strict framework-aware mode for React, Vue, and Tailwind focus-visible requirements
-
-## Hook Setup
-
-Run once per local clone:
-
-```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\setup-git-hooks.ps1
-```
-
-Verify:
-
-```powershell
-git config --get core.hooksPath
-```
-
-Expected value:
+Top-level tree (trimmed to important app files):
 
 ```text
-.githooks
+PhoneShopWebapp/
+|-- PhoneShop.Client/
+|   |-- Auth/
+|   |-- Pages/
+|   |   |-- Admin/
+|   |-- Services/
+|   |-- wwwroot/
+|   |   `-- appsettings.json
+|   |-- App.razor
+|   `-- Program.cs
+|-- PhoneShop.Server/
+|   |-- Controllers/
+|   |-- Data/
+|   |-- Services/
+|   |-- appsettings.json
+|   |-- appsettings.Development.json
+|   `-- Program.cs
+|-- PhoneShop.Shared/
+|   |-- DTOs/
+|   |-- Models/
+|   `-- Options/
+|-- Technical-Design-Document.md
+|-- setup.ps1
+`-- README.md
 ```
 
-## Strict Framework Mode
+## 6) Data Model Overview
 
-The checker supports selective strict enforcement by framework.
+Core entities:
 
-Examples:
+- ApplicationUser
+- Category
+- Product
+- CartItem
+
+Important DTOs:
+
+- RegisterRequest, LoginRequest, AuthResponse
+- CategoryDto, ProductDto
+- CartRequest, CartItemDto
+
+## 7) API Overview
+
+Base path: /api
+
+Auth:
+
+- POST /api/auth/register
+- POST /api/auth/login
+
+Categories:
+
+- GET /api/categories
+- GET /api/categories/{id}
+- POST /api/categories (Admin)
+- PUT /api/categories/{id} (Admin)
+- DELETE /api/categories/{id} (Admin, soft deactivate)
+
+Products:
+
+- GET /api/products?categoryId=&search=
+- GET /api/products/{id}
+- POST /api/products (Admin)
+- PUT /api/products/{id} (Admin)
+- DELETE /api/products/{id} (Admin, soft deactivate)
+
+Cart (Authorized):
+
+- GET /api/cart
+- POST /api/cart/add
+- POST /api/cart/update
+- DELETE /api/cart/remove/{productId}
+- DELETE /api/cart/clear
+
+OpenAPI endpoint (development):
+
+- /openapi/v1.json
+- Swagger UI available at /swagger
+
+## 8) Authentication and Authorization
+
+- JWT config is loaded from the Jwt section in server settings.
+- Claims include user id (sub), email, name, and role.
+- Policy AdminOnly is used to protect admin operations.
+- Client stores token in local storage and attaches Bearer auth header.
+
+## 9) Configuration
+
+Server settings:
+
+- ConnectionStrings:DefaultConnection (MySQL connection)
+- Jwt:Key, Issuer, Audience, ExpiresMinutes
+- AllowedOrigins (must include the client origin)
+
+Client settings:
+
+- ApiBaseUrl in PhoneShop.Client/wwwroot/appsettings.json
+
+Default development values:
+
+- API base URL: https://localhost:5001
+- Allowed client origin: https://localhost:7001
+
+If your client runs on another port, update AllowedOrigins.
+
+## 10) HOW-TO-RUN in VS Code on Windows 11
+
+### Prerequisites
+
+Install:
+
+1. .NET SDK 10
+2. MySQL Server 8+ (or compatible)
+3. VS Code
+4. VS Code C# extension (recommended: C# Dev Kit)
+
+Optional but recommended:
+
+- EF CLI tool:
 
 ```powershell
-# Default strict mode (React, Vue, Tailwind)
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\ui-precommit-check.ps1 -Strict
-
-# Strict mode for React and Vue only
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\ui-precommit-check.ps1 -Strict -StrictFrameworks React,Vue
-
-# Strict mode for Tailwind only
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\ui-precommit-check.ps1 -Strict -StrictFrameworks Tailwind
+dotnet tool install --global dotnet-ef
 ```
 
-## Development Workflow
+Verify tools:
 
-1. Pick the section(s) from `references/` that match the requested task.
-2. Draft implementation aligned with architecture and security constraints.
-3. Apply UI review checklist for frontend-facing changes.
-4. Run relevant tests and validation commands.
-5. Submit via PR with concise change summary and risk notes.
+```powershell
+dotnet --version
+mysql --version
+```
 
-## Recommended Quality Baseline
+### Step A: Open project in VS Code
 
-- Use async-first data and API operations where possible.
-- Keep controllers thin; move business logic to services.
-- Prefer explicit DTO boundaries for API contracts.
-- Validate inputs server-side regardless of client checks.
-- Standardize structured logging and error envelopes.
-- Design for deployment parity between local, CI, and production.
+```powershell
+cd d:\laragon\www\PhoneShopWebapp
+code .
+```
 
-## Compatibility Notes
+### Step B: Bootstrap solution (if needed)
 
-- ASP.NET Core guidance assumes modern .NET (recommended: .NET 8 LTS).
-- ASP.NET MVC 5 guidance applies to .NET Framework 4.x maintenance scenarios.
-- MySQL patterns include both EF Core and lower-level ADO.NET for mixed stacks.
+If PhoneShop.sln does not exist yet, run:
 
-## Contributing
+```powershell
+pwsh -ExecutionPolicy Bypass -File .\setup.ps1
+```
 
-- Keep `SKILL.md` concise and route details to `references/`.
-- Preserve section naming consistency (`A-...` through `H-...`).
-- Prefer additive updates over broad rewrites in deep reference files.
-- Keep examples runnable and production-safe.
+This creates the solution and adds all 3 projects.
 
-## License
+### Step C: Configure database and JWT
 
-This project is licensed under the MIT License. See `LICENSE`.
+Edit PhoneShop.Server/appsettings.Development.json:
+
+```json
+{
+	"ConnectionStrings": {
+		"DefaultConnection": "Server=localhost;Database=phoneshop;User=root;Password=yourpassword;TreatTinyAsBoolean=true;"
+	},
+	"Jwt": {
+		"Key": "dev-secret-key-change-me-min32chars!!",
+		"Issuer": "PhoneShop",
+		"Audience": "PhoneShopClient",
+		"ExpiresMinutes": 60
+	},
+	"AllowedOrigins": "https://localhost:7001"
+}
+```
+
+Also ensure client API target is correct in PhoneShop.Client/wwwroot/appsettings.json:
+
+```json
+{
+	"ApiBaseUrl": "https://localhost:5001"
+}
+```
+
+### Step D: Create database and migrations
+
+Create an empty MySQL database named phoneshop, then run:
+
+```powershell
+cd .\PhoneShop.Server
+dotnet ef migrations add InitialCreate -o Data/Migrations
+dotnet ef database update
+cd ..
+```
+
+Note: The server also executes Database.Migrate() on startup.
+
+### Step E: Trust HTTPS development certificate
+
+```powershell
+dotnet dev-certs https --trust
+```
+
+### Step F: Run backend and frontend in two VS Code terminals
+
+Terminal 1 (API):
+
+```powershell
+dotnet run --project .\PhoneShop.Server
+```
+
+Terminal 2 (Client):
+
+```powershell
+dotnet run --project .\PhoneShop.Client
+```
+
+### Step G: Open app and API docs
+
+- Client app: use the HTTPS URL printed by the client terminal (typically https://localhost:7001)
+- API Swagger: https://localhost:5001/swagger
+
+If client port is not 7001, update AllowedOrigins in server settings.
+
+### Step H: Login with seeded admin account
+
+- Email: admin@phoneshop.local
+- Password: Admin1234!
+
+## 11) Seeded Data
+
+On first run, seed logic creates:
+
+- 1 admin user
+- Categories:
+	- Android
+	- iOS
+	- Accessories
+- Sample products:
+	- Samsung Galaxy S24
+	- Google Pixel 9
+	- iPhone 16
+	- USB-C Fast Charger 65W
+
+## 12) Common Issues and Fixes
+
+1. CORS error in browser
+	 - Ensure AllowedOrigins matches the actual client HTTPS URL.
+
+2. MySQL connection failure
+	 - Verify host/user/password in DefaultConnection.
+	 - Ensure MySQL service is running.
+
+3. Migration errors
+	 - Run dotnet restore first.
+	 - Ensure dotnet-ef is installed and available in PATH.
+
+4. 401 Unauthorized after login
+	 - Check JWT Key/Issuer/Audience values are consistent.
+	 - Clear browser local storage token and login again.
+
+5. HTTPS certificate warnings
+	 - Run dotnet dev-certs https --trust and restart browser.
+
+## 13) Useful Commands
+
+Restore/build all:
+
+```powershell
+dotnet restore
+dotnet build
+```
+
+Run only API:
+
+```powershell
+dotnet run --project .\PhoneShop.Server
+```
+
+Run only Client:
+
+```powershell
+dotnet run --project .\PhoneShop.Client
+```
+
+Create/update migrations:
+
+```powershell
+cd .\PhoneShop.Server
+dotnet ef migrations add <MigrationName> -o Data/Migrations
+dotnet ef database update
+```

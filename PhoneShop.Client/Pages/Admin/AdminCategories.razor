@@ -1,0 +1,109 @@
+@page "/admin/categories"
+@attribute [Authorize(Roles = "Admin")]
+@inject ICategoryService CategoryService
+
+<PageTitle>Manage Categories – PhoneShop</PageTitle>
+
+<h1>Manage Categories</h1>
+
+<button @onclick="ShowCreate" class="btn btn-success">+ New Category</button>
+
+@if (_showForm)
+{
+    <div class="admin-form" role="region" aria-label="Category form">
+        <h3>@(_editing.Id == 0 ? "Create" : "Edit") Category</h3>
+        <EditForm Model="@_editing" OnValidSubmit="Save">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="form-group">
+                <label for="cat-name">Name</label>
+                <InputText id="cat-name" @bind-Value="_editing.Name" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="cat-desc">Description</label>
+                <InputText id="cat-desc" @bind-Value="_editing.Description" class="form-control" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="button" @onclick="Cancel" class="btn btn-secondary">Cancel</button>
+        </EditForm>
+    </div>
+}
+
+@if (_loading)
+{
+    <p>Loading…</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Description</th>
+                <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cat in _categories)
+            {
+                <tr>
+                    <td>@cat.Name</td>
+                    <td>@cat.Description</td>
+                    <td>
+                        <button @onclick="() => Edit(cat)"      class="btn btn-sm btn-primary">Edit</button>
+                        <button @onclick="() => Delete(cat.Id)" class="btn btn-sm btn-danger">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<CategoryDto> _categories = [];
+    private CategoryDto       _editing    = new();
+    private bool              _loading    = true;
+    private bool              _showForm;
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    private async Task Load()
+    {
+        _loading    = true;
+        _categories = await CategoryService.GetCategoriesAsync();
+        _loading    = false;
+    }
+
+    private void ShowCreate()
+    {
+        _editing   = new CategoryDto();
+        _showForm  = true;
+    }
+
+    private void Edit(CategoryDto cat)
+    {
+        _editing  = new CategoryDto { Id = cat.Id, Name = cat.Name, Description = cat.Description };
+        _showForm = true;
+    }
+
+    private async Task Save()
+    {
+        if (_editing.Id == 0)
+            await CategoryService.CreateCategoryAsync(_editing);
+        else
+            await CategoryService.UpdateCategoryAsync(_editing.Id, _editing);
+
+        _showForm = false;
+        await Load();
+    }
+
+    private async Task Delete(int id)
+    {
+        await CategoryService.DeleteCategoryAsync(id);
+        await Load();
+    }
+
+    private void Cancel() => _showForm = false;
+}

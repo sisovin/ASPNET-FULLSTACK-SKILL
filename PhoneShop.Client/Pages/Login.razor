@@ -1,0 +1,58 @@
+@page "/login"
+@inject IAuthService    AuthService
+@inject NavigationManager Nav
+
+<PageTitle>Login – PhoneShop</PageTitle>
+
+<div class="auth-form">
+    <h2>Login</h2>
+
+    @if (!string.IsNullOrEmpty(_error))
+    {
+        <div class="alert" role="alert">@_error</div>
+    }
+
+    <EditForm Model="@_request" OnValidSubmit="HandleLogin">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <InputText id="email" @bind-Value="_request.Email" class="form-control" type="email" autocomplete="email" />
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <InputText id="password" @bind-Value="_request.Password" class="form-control" type="password" autocomplete="current-password" />
+        </div>
+
+        <button type="submit" class="btn btn-primary" disabled="@_loading">
+            @(_loading ? "Logging in…" : "Login")
+        </button>
+    </EditForm>
+
+    <p>Don't have an account? <a href="/register">Register</a></p>
+</div>
+
+@code {
+    private readonly LoginRequest _request = new();
+    private string? _error;
+    private bool    _loading;
+
+    protected override void OnInitialized()
+    {
+        // Redirect to query-string returnUrl if present
+    }
+
+    private async Task HandleLogin()
+    {
+        _loading = true;
+        _error   = null;
+        var result = await AuthService.LoginAsync(_request);
+        _loading = false;
+
+        if (result is null)
+            _error = "Invalid email or password.";
+        else
+            Nav.NavigateTo("/");
+    }
+}

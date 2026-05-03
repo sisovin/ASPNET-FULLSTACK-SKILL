@@ -1,0 +1,44 @@
+@inherits LayoutComponentBase
+
+<div class="page">
+    <header class="top-bar">
+        <a href="/" class="brand">📱 PhoneShop</a>
+        <nav>
+            <NavLink href="/" Match="NavLinkMatch.All">Home</NavLink>
+            <NavLink href="/categories">Products</NavLink>
+            <AuthorizeView>
+                <Authorized>
+                    <NavLink href="/cart">🛒 Cart</NavLink>
+                    <AuthorizeView Roles="Admin">
+                        <Authorized><NavLink href="/admin">Admin</NavLink></Authorized>
+                    </AuthorizeView>
+                    <span class="user-name">@context.User.Identity?.Name</span>
+                    <button class="btn-link" @onclick="Logout">Logout</button>
+                </Authorized>
+                <NotAuthorized>
+                    <NavLink href="/login">Login</NavLink>
+                    <NavLink href="/register">Register</NavLink>
+                </NotAuthorized>
+            </AuthorizeView>
+        </nav>
+    </header>
+
+    <main class="content">
+        @Body
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; @DateTime.Now.Year PhoneShop</p>
+    </footer>
+</div>
+
+@code {
+    [Inject] IAuthService AuthService { get; set; } = default!;
+    [Inject] NavigationManager Nav     { get; set; } = default!;
+
+    private async Task Logout()
+    {
+        await AuthService.LogoutAsync();
+        Nav.NavigateTo("/", forceLoad: true);
+    }
+}

@@ -1,0 +1,26 @@
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(App).Assembly">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                <NotAuthorized>
+                    @if (context.User.Identity?.IsAuthenticated == true)
+                    {
+                        <p>You are not authorised to view this page.</p>
+                    }
+                    else
+                    {
+                        <p>Please <a href="/login">log in</a> to continue.</p>
+                    }
+                </NotAuthorized>
+            </AuthorizeRouteView>
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        </Found>
+        <NotFound>
+            <PageTitle>Not Found</PageTitle>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <h2>Page not found</h2>
+                <p>Sorry, there is nothing at this address. <a href="/">Go home</a></p>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>

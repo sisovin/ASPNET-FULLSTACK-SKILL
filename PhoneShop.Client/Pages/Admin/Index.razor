@@ -1,0 +1,17 @@
+@page "/admin"
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Admin Dashboard – PhoneShop</PageTitle>
+
+<h1>Admin Dashboard</h1>
+
+<div class="admin-links">
+    <a href="/admin/categories" class="admin-card">
+        <h3>📂 Categories</h3>
+        <p>Create, edit and deactivate product categories.</p>
+    </a>
+    <a href="/admin/products" class="admin-card">
+        <h3>📱 Products</h3>
+        <p>Add, update and remove products from the catalogue.</p>
+    </a>
+</div>

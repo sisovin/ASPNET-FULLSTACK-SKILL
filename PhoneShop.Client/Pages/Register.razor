@@ -1,0 +1,57 @@
+@page "/register"
+@inject IAuthService  AuthService
+@inject NavigationManager Nav
+
+<PageTitle>Register – PhoneShop</PageTitle>
+
+<div class="auth-form">
+    <h2>Create Account</h2>
+
+    @if (!string.IsNullOrEmpty(_error))
+    {
+        <div class="alert" role="alert">@_error</div>
+    }
+
+    <EditForm Model="@_request" OnValidSubmit="HandleRegister">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="fullname">Full Name</label>
+            <InputText id="fullname" @bind-Value="_request.FullName" class="form-control" autocomplete="name" />
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <InputText id="email" @bind-Value="_request.Email" class="form-control" type="email" autocomplete="email" />
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <InputText id="password" @bind-Value="_request.Password" class="form-control" type="password" autocomplete="new-password" />
+        </div>
+
+        <button type="submit" class="btn btn-primary" disabled="@_loading">
+            @(_loading ? "Creating account…" : "Register")
+        </button>
+    </EditForm>
+
+    <p>Already have an account? <a href="/login">Login</a></p>
+</div>
+
+@code {
+    private readonly RegisterRequest _request = new();
+    private string? _error;
+    private bool    _loading;
+
+    private async Task HandleRegister()
+    {
+        _loading = true;
+        _error   = null;
+        var result = await AuthService.RegisterAsync(_request);
+        _loading = false;
+
+        if (result is null)
+            _error = "Registration failed. Email may already be in use.";
+        else
+            Nav.NavigateTo("/");
+    }
+}

@@ -1,0 +1,145 @@
+@page "/admin/products"
+@attribute [Authorize(Roles = "Admin")]
+@inject IProductService  ProductService
+@inject ICategoryService CategoryService
+
+<PageTitle>Manage Products – PhoneShop</PageTitle>
+
+<h1>Manage Products</h1>
+
+<button @onclick="ShowCreate" class="btn btn-success">+ New Product</button>
+
+@if (_showForm)
+{
+    <div class="admin-form" role="region" aria-label="Product form">
+        <h3>@(_editing.Id == 0 ? "Create" : "Edit") Product</h3>
+        <EditForm Model="@_editing" OnValidSubmit="Save">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="form-group">
+                <label for="prod-name">Name</label>
+                <InputText id="prod-name" @bind-Value="_editing.Name" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="prod-brand">Brand</label>
+                <InputText id="prod-brand" @bind-Value="_editing.Brand" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="prod-price">Price ($)</label>
+                <InputNumber id="prod-price" @bind-Value="_editing.Price" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="prod-desc">Description</label>
+                <InputTextArea id="prod-desc" @bind-Value="_editing.Description" class="form-control" rows="3" />
+            </div>
+            <div class="form-group">
+                <label for="prod-img">Image URL</label>
+                <InputText id="prod-img" @bind-Value="_editing.ImageUrl" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="prod-cat">Category</label>
+                <InputSelect id="prod-cat" @bind-Value="_editing.CategoryId" class="form-control">
+                    @foreach (var cat in _categories)
+                    {
+                        <option value="@cat.Id">@cat.Name</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="button" @onclick="Cancel" class="btn btn-secondary">Cancel</button>
+        </EditForm>
+    </div>
+}
+
+@if (_loading)
+{
+    <p>Loading…</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Brand</th>
+                <th scope="col">Price</th>
+                <th scope="col">Category</th>
+                <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in _products)
+            {
+                <tr>
+                    <td>@p.Name</td>
+                    <td>@p.Brand</td>
+                    <td>$@p.Price.ToString("F2")</td>
+                    <td>@p.CategoryName</td>
+                    <td>
+                        <button @onclick="() => Edit(p)"      class="btn btn-sm btn-primary">Edit</button>
+                        <button @onclick="() => Delete(p.Id)" class="btn btn-sm btn-danger">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<ProductDto>  _products   = [];
+    private List<CategoryDto> _categories = [];
+    private ProductDto        _editing    = new();
+    private bool              _loading    = true;
+    private bool              _showForm;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _categories = await CategoryService.GetCategoriesAsync();
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        _loading  = true;
+        _products = await ProductService.GetProductsAsync();
+        _loading  = false;
+    }
+
+    private void ShowCreate()
+    {
+        _editing  = new ProductDto { CategoryId = _categories.FirstOrDefault()?.Id ?? 0 };
+        _showForm = true;
+    }
+
+    private void Edit(ProductDto p)
+    {
+        _editing = new ProductDto
+        {
+            Id = p.Id, Name = p.Name, Brand = p.Brand, Price = p.Price,
+            Description = p.Description, ImageUrl = p.ImageUrl,
+            CategoryId = p.CategoryId, CategoryName = p.CategoryName
+        };
+        _showForm = true;
+    }
+
+    private async Task Save()
+    {
+        if (_editing.Id == 0)
+            await ProductService.CreateProductAsync(_editing);
+        else
+            await ProductService.UpdateProductAsync(_editing.Id, _editing);
+
+        _showForm = false;
+        await Load();
+    }
+
+    private async Task Delete(int id)
+    {
+        await ProductService.DeleteProductAsync(id);
+        await Load();
+    }
+
+    private void Cancel() => _showForm = false;
+}

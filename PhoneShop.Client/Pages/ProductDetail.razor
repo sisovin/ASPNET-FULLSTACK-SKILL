@@ -1,0 +1,83 @@
+@page "/product/{Id:int}"
+@inject IProductService ProductService
+@inject ICartService    CartService
+
+<PageTitle>@(_product?.Name ?? "Product") – PhoneShop</PageTitle>
+
+@if (_loading)
+{
+    <p>Loading…</p>
+}
+else if (_product is null)
+{
+    <p>Product not found. <a href="/">Go home</a></p>
+}
+else
+{
+    <div class="product-detail">
+        @if (!string.IsNullOrEmpty(_product.ImageUrl))
+        {
+            <img src="@_product.ImageUrl" alt="@_product.Name" class="product-image" />
+        }
+        <div class="product-info">
+            <h1>@_product.Name</h1>
+            @if (!string.IsNullOrEmpty(_product.Brand))
+            {
+                <p class="brand">by @_product.Brand</p>
+            }
+            <p class="category">Category: <a href="/category/@_product.CategoryId">@_product.CategoryName</a></p>
+            <p class="price">$@_product.Price.ToString("F2")</p>
+            @if (!string.IsNullOrEmpty(_product.Description))
+            {
+                <p class="description">@_product.Description</p>
+            }
+
+            <div class="add-to-cart">
+                <label for="qty">Qty</label>
+                <input id="qty" type="number" @bind="_quantity" min="1" max="99" class="qty-input" />
+
+                <AuthorizeView>
+                    <Authorized>
+                        <button @onclick="AddToCart" class="btn btn-primary" disabled="@_busy">
+                            @(_busy ? "Adding…" : "Add to Cart")
+                        </button>
+                        @if (_added)
+                        {
+                            <span class="success-msg" role="status">✓ Added to cart!</span>
+                        }
+                    </Authorized>
+                    <NotAuthorized>
+                        <a href="/login" class="btn btn-outline">Login to buy</a>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private ProductDto? _product;
+    private bool        _loading = true;
+    private bool        _busy;
+    private bool        _added;
+    private int         _quantity = 1;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loading = true;
+        _product = await ProductService.GetProductAsync(Id);
+        _loading = false;
+    }
+
+    private async Task AddToCart()
+    {
+        _busy = true;
+        await CartService.AddToCartAsync(_product!.Id, _quantity);
+        _busy  = false;
+        _added = true;
+        await Task.Delay(2500);
+        _added = false;
+    }
+}

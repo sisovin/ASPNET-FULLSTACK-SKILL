@@ -1,0 +1,71 @@
+@page "/categories"
+@page "/category/{CategoryId:int}"
+@inject IProductService  ProductService
+@inject ICategoryService CategoryService
+
+<PageTitle>@(_category?.Name ?? "All Products") – PhoneShop</PageTitle>
+
+<h1>@(_category?.Name ?? "All Products")</h1>
+
+<div class="search-bar">
+    <input @bind="_search"
+           @bind:event="oninput"
+           @oninput="OnSearch"
+           placeholder="Search phones…"
+           class="form-control"
+           aria-label="Search products" />
+</div>
+
+@if (_loading)
+{
+    <p>Loading products…</p>
+}
+else if (_products.Count == 0)
+{
+    <p>No products found.</p>
+}
+else
+{
+    <div class="product-grid">
+        @foreach (var p in _products)
+        {
+            <a href="/product/@p.Id" class="product-card">
+                @if (!string.IsNullOrEmpty(p.ImageUrl))
+                {
+                    <img src="@p.ImageUrl" alt="@p.Name" loading="lazy" />
+                }
+                <h3>@p.Name</h3>
+                <p class="brand">@p.Brand</p>
+                <p class="price">$@p.Price.ToString("F2")</p>
+            </a>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public int? CategoryId { get; set; }
+
+    private List<ProductDto> _products  = [];
+    private CategoryDto?     _category;
+    private string?          _search;
+    private bool             _loading   = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loading  = true;
+        _search   = null;
+        _category = CategoryId.HasValue
+            ? await CategoryService.GetCategoryAsync(CategoryId.Value)
+            : null;
+        _products = await ProductService.GetProductsAsync(CategoryId);
+        _loading  = false;
+    }
+
+    private async Task OnSearch(ChangeEventArgs e)
+    {
+        _search   = e.Value?.ToString();
+        _loading  = true;
+        _products = await ProductService.GetProductsAsync(CategoryId, _search);
+        _loading  = false;
+    }
+}
